@@ -4,15 +4,25 @@ import * as React from "react";
 
 var win = window.ethereum;
 
-console.log("Connected to metamsk wallet: ", window.ethereum.request({
-          method: "eth_requestAccounts"
-        }));
+var handlers = {
+  connectToMetamaskWallet: (function (param) {
+      window.ethereum.request({
+            method: "eth_requestAccounts"
+          });
+      
+    })
+};
 
 function MetamaskTest(Props) {
   return React.createElement("div", undefined, React.createElement("p", {
                   className: "p-5 text-3xl"
-                }, "Welcome to Metamask test"), React.createElement("p", {
-                  className: "p-5 text-3xl"
+                }, "Welcome to Metamask test"), React.createElement("div", {
+                  className: "p-5"
+                }, React.createElement("button", {
+                      className: "p-5 bg-blue-400 rounded-lg text-white",
+                      onClick: handlers.connectToMetamaskWallet
+                    }, "Connect to Metamask")), React.createElement("p", {
+                  className: "p-5 text-3xl "
                 }, "Hello"));
 }
 
@@ -20,6 +30,7 @@ var make = MetamaskTest;
 
 export {
   win ,
+  handlers ,
   make ,
   
 }
