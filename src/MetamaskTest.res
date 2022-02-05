@@ -70,7 +70,7 @@ let make = () => {
       <p>
         {"Account address: "->React.string}
         {metamaskAddress
-        ->Belt.Option.getWithDefault("value unavailable(Metamsk not connected)")
+        ->Belt.Option.getWithDefault("value unavailable(Metamask not connected)")
         ->React.string}
       </p>
       <p>
