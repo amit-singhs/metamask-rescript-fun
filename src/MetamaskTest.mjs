@@ -5,17 +5,18 @@ import * as React from "react";
 import * as Caml_array from "../node_modules/rescript/lib/es6/caml_array.js";
 import * as Belt_Option from "../node_modules/rescript/lib/es6/belt_Option.js";
 
-import {ethers} from 'ethers';
+import {ethers} from 'ethers'
 ;
 
 function MetamaskTest(Props) {
   var match = React.useState(function () {
-        return [""];
+        
       });
   var setMetamaskAddress = match[1];
   var match$1 = React.useState(function () {
         
       });
+  var setAccountBalance = match$1[1];
   var handlers = {
     connectToMetamaskWallet: (function (param) {
         window.ethereum.request({
@@ -23,21 +24,24 @@ function MetamaskTest(Props) {
               }).then(function (acc) {
               console.log("Acc value fetched after promise: ", acc);
               Curry._1(setMetamaskAddress, (function (param) {
-                      return [acc];
+                      return Caml_array.get(acc, 0);
                     }));
               window.ethereum.request({
                       method: "eth_getBalance",
                       params: [
-                        [acc],
-                        ["latest"]
+                        Caml_array.get(acc, 0),
+                        "latest"
                       ]
                     }).then(function (someBal) {
                     console.log("Somebalance fetched is: ", someBal);
+                    var bal = ethers.utils.formatEther(someBal);
+                    Curry._1(setAccountBalance, (function (param) {
+                            return bal;
+                          }));
+                    console.log("Ultimate value of bal fetched is: ", bal);
                     return Promise.resolve(undefined);
                   });
-              return Promise.resolve({
-                          method: "eth_requestAccounts"
-                        });
+              return Promise.resolve(undefined);
             });
         
       })
@@ -51,7 +55,7 @@ function MetamaskTest(Props) {
                       onClick: handlers.connectToMetamaskWallet
                     }, "Connect to Metamask")), React.createElement("div", {
                   className: "p-5 text-3xl "
-                }, React.createElement("p", undefined, "Account address: ", Caml_array.get(match[0], 0)), React.createElement("p", undefined, "Account balance: ", Belt_Option.getWithDefault(match$1[0], "value not available(Metamask not connected)"))));
+                }, React.createElement("p", undefined, "Account address: ", Belt_Option.getWithDefault(match[0], "value unavailable(Metamsk not connected)")), React.createElement("p", undefined, "Account balance: ", Belt_Option.getWithDefault(match$1[0], "value unavailable(Metamask not connected)"))));
 }
 
 var make = MetamaskTest;

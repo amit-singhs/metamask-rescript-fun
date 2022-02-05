@@ -12,7 +12,8 @@
     "web:build": "parcel build src/index.html",
     "css:start": "tailwindcss -i src/style.css -o src/assets/tailwind/tailwind.css -w",
     "css:build": "tailwindcss -i src/style.css -o src/assets/tailwind/tailwind.css -b",
-    "start": "concurrently \"npm run re:start\" \"npm run web:start\" \"npm run css:start\""
+    "start": "concurrently \"npm run re:start\" \"npm run web:start\" \"npm run css:start\"",
+    "build": "concurrently \"npm run re:build\" \"npm run web:build\" \"npm run css:build\""
   },
   "dependencies": {
     "@metamask/detect-provider": "^1.2.0",
