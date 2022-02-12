@@ -11,13 +11,18 @@ type ethereum = {
   isMetaMask: bool,
   request: requestParams,
 }
-type handlers = {connectToMetamaskWallet: ReactEvent.Mouse.t => unit}
+type handlers = {
+  connectToMetamaskWallet: ReactEvent.Mouse.t => unit,
+  renderTransactionComponent: bool => React.element,
+}
 type action =
   | SetAccountAddress(option<string>)
   | SetAccountBalance(option<string>)
+  | SetTransactionFlag
 type state = {
   accountAddress: option<string>,
   accountBalance: option<string>,
+  enableTransaction: bool,
 }
 
 type window = {ethereum: ethereum}
@@ -40,6 +45,7 @@ let reducer = (state, action) => {
   switch action {
   | SetAccountAddress(someAddress) => {...state, accountAddress: someAddress}
   | SetAccountBalance(someBalance) => {...state, accountBalance: someBalance}
+  | SetTransactionFlag => {...state, enableTransaction: true}
   }
 }
 
@@ -47,7 +53,10 @@ let reducer = (state, action) => {
 let make = () => {
   let (windowEthereumObject, _setWindowEthereumObject) = React.useState(_ => ethereumConstructor)
   let (ethersUtilObject, _setEthersUtilObject) = React.useState(_ => ethersConstructor)
-  let (state, dispatch) = React.useReducer(reducer, {accountAddress: None, accountBalance: None})
+  let (state, dispatch) = React.useReducer(
+    reducer,
+    {accountAddress: None, accountBalance: None, enableTransaction: false},
+  )
 
   React.useEffect(() => {
     Js.log("From inside useEffect code block, line 66: ")
@@ -70,6 +79,7 @@ let make = () => {
       ->then(fetchedBalanceHex => {
         let readableBalance = ethersUtilObject->formatEther(fetchedBalanceHex)
         SetAccountBalance(Some(readableBalance))->dispatch
+        SetTransactionFlag->dispatch
         resolve()
       })
   }
@@ -96,6 +106,13 @@ let make = () => {
           resolve()
         })
     },
+    renderTransactionComponent: transactionFlag => {
+      if transactionFlag {
+        <TransactionContainer />
+      } else {
+        <div />
+      }
+    },
   }
 
   <div>
@@ -120,6 +137,7 @@ let make = () => {
         ->Belt.Option.getWithDefault("value unavailable(Metamask not connected)")
         ->React.string}
       </p>
+      {handlers.renderTransactionComponent(state.enableTransaction)}
     </div>
   </div>
 }

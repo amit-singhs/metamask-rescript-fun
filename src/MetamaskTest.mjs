@@ -4,20 +4,29 @@ import * as Curry from "../node_modules/rescript/lib/es6/curry.js";
 import * as React from "react";
 import * as Caml_array from "../node_modules/rescript/lib/es6/caml_array.js";
 import * as Belt_Option from "../node_modules/rescript/lib/es6/belt_Option.js";
+import * as TransactionContainer from "./TransactionContainer.mjs";
 
 import {ethers} from 'ethers'
 ;
 
 function reducer(state, action) {
-  if (action.TAG === /* SetAccountAddress */0) {
+  if (typeof action === "number") {
+    return {
+            accountAddress: state.accountAddress,
+            accountBalance: state.accountBalance,
+            enableTransaction: true
+          };
+  } else if (action.TAG === /* SetAccountAddress */0) {
     return {
             accountAddress: action._0,
-            accountBalance: state.accountBalance
+            accountBalance: state.accountBalance,
+            enableTransaction: state.enableTransaction
           };
   } else {
     return {
             accountAddress: state.accountAddress,
-            accountBalance: action._0
+            accountBalance: action._0,
+            enableTransaction: state.enableTransaction
           };
   }
 }
@@ -33,7 +42,8 @@ function MetamaskTest(Props) {
   var ethersUtilObject = match$1[0];
   var match$2 = React.useReducer(reducer, {
         accountAddress: undefined,
-        accountBalance: undefined
+        accountBalance: undefined,
+        enableTransaction: false
       });
   var dispatch = match$2[1];
   var state = match$2[0];
@@ -62,6 +72,7 @@ function MetamaskTest(Props) {
                 TAG: /* SetAccountBalance */1,
                 _0: readableBalance
               });
+          Curry._1(dispatch, /* SetTransactionFlag */0);
           return Promise.resolve(undefined);
         });
     
@@ -78,16 +89,21 @@ function MetamaskTest(Props) {
               }));
         return Promise.resolve(undefined);
       });
-  var handlers = {
-    connectToMetamaskWallet: (function (param) {
-        windowEthereumObject.request({
-                method: "eth_requestAccounts"
-              }).then(function (fetchedAccount) {
-              setAccount(fetchedAccount);
-              return Promise.resolve(undefined);
-            });
-        
-      })
+  var handlers_connectToMetamaskWallet = function (param) {
+    windowEthereumObject.request({
+            method: "eth_requestAccounts"
+          }).then(function (fetchedAccount) {
+          setAccount(fetchedAccount);
+          return Promise.resolve(undefined);
+        });
+    
+  };
+  var handlers_renderTransactionComponent = function (transactionFlag) {
+    if (transactionFlag) {
+      return React.createElement(TransactionContainer.make, {});
+    } else {
+      return React.createElement("div", undefined);
+    }
   };
   return React.createElement("div", undefined, React.createElement("p", {
                   className: "p-5 text-3xl"
@@ -95,10 +111,10 @@ function MetamaskTest(Props) {
                   className: "p-5"
                 }, React.createElement("button", {
                       className: "p-5 bg-blue-400 rounded-lg text-white",
-                      onClick: handlers.connectToMetamaskWallet
+                      onClick: handlers_connectToMetamaskWallet
                     }, "Connect to Metamask")), React.createElement("div", {
                   className: "p-5 text-3xl "
-                }, React.createElement("p", undefined, "Account address: ", Belt_Option.getWithDefault(state.accountAddress, "value unavailable(Metamask not connected)")), React.createElement("p", undefined, "Account balance: ", Belt_Option.getWithDefault(state.accountBalance, "value unavailable(Metamask not connected)"))));
+                }, React.createElement("p", undefined, "Account address: ", Belt_Option.getWithDefault(state.accountAddress, "value unavailable(Metamask not connected)")), React.createElement("p", undefined, "Account balance: ", Belt_Option.getWithDefault(state.accountBalance, "value unavailable(Metamask not connected)")), Curry._1(handlers_renderTransactionComponent, state.enableTransaction)));
 }
 
 var make = MetamaskTest;
