@@ -10,10 +10,7 @@ type ethereum = {
   isMetaMask: bool,
   request: requestParams,
 }
-type handlers = {
-  connectToMetamaskWallet: ReactEvent.Mouse.t => unit,
-  onListener: ReactEvent.Mouse.t => unit,
-}
+type handlers = {connectToMetamaskWallet: ReactEvent.Mouse.t => unit}
 type action =
   | SetAccountAddress(option<string>)
   | SetAccountBalance(option<string>)
@@ -23,16 +20,15 @@ type state = {
 }
 
 type window = {ethereum: ethereum}
-// @val external window: window = "window"
-// %%raw("import {ethers} from 'ethers'")
+%%raw("import {ethers} from 'ethers'")
 
-// %raw("window.ethereum.on('accountsChanged', accountChangedHandler)")
-@val external ethers: ethers = "ethers"
 @scope("window") @val external ethereumConstructor: ethereum = "ethereum"
-@scope("window.ethereum") @val external addOnEventListener: (string, unit => unit) => unit = "on"
+@scope("ethers") @val external ethersConstructor: ethers = "utils"
+@scope("window.ethereum") @val
+external addOnEventListener: (string, array<string> => unit) => unit = "on"
 @send external sendRequest: (ethereum, requestParams) => Promise.t<array<string>> = "request"
 @send external sendBalanceRequest: (ethereum, addParams) => Promise.t<string> = "request"
-@send external formatEther: (utilsModule, string) => string = "formatEther"
+@send external formatEther: (ethers, string) => string = "formatEther"
 @send external onAccountChangeListener: (ethereum, string, unit => unit) => unit = "on"
 
 let reducer = (state, action) => {
@@ -41,63 +37,54 @@ let reducer = (state, action) => {
   | SetAccountBalance(someBalance) => {...state, accountBalance: someBalance}
   }
 }
-// let accountChangedHandler = newAcc => {
-//   Js.log2("Account changed----------->", newAcc[0])
-// }
+
 @react.component
 let make = () => {
-  let (windowObj, setWindowObj) = React.useState(_ => ethereumConstructor)
+  let (windowEthereumObject, _setWindowEthereumObject) = React.useState(_ => ethereumConstructor)
+  let (ethersUtilObject, _setEthersUtilObject) = React.useState(_ => ethersConstructor)
   let (state, dispatch) = React.useReducer(reducer, {accountAddress: None, accountBalance: None})
 
-  React.useEffect1(() => {
-    let getEthereumObject = () => setWindowObj(_ => ethereumConstructor)
-    addOnEventListener("accountsChanged", getEthereumObject)
+  React.useEffect(() => {
+    Js.log("From inside useEffect code block, line 66: ")
 
-    // Js.log2("eth object from line 56: ", eth)
     None
-  }, [windowObj])
-
-  Js.log2("windowObj use state value: ", windowObj)
-  windowObj
+  })
+  let setAccount = account => {
+    SetAccountAddress(Some(account[0]))->dispatch
+    let _ =
+      windowEthereumObject
+      ->sendBalanceRequest({
+        method: "eth_getBalance",
+        params: [account[0], "latest"],
+      })
+      ->then(fetchedBalanceHex => {
+        let readableBalance = ethersUtilObject->formatEther(fetchedBalanceHex)
+        SetAccountBalance(Some(readableBalance))->dispatch
+        resolve()
+      })
+  }
+  Js.log2("windowObj use state value: ", windowEthereumObject)
+  windowEthereumObject
   ->sendRequest({method: "eth_requestAccounts"})
   ->then(acc => {
     Js.log2("Acc value fetched is: ", acc)
+    addOnEventListener("accountsChanged", newAcc => {
+      setAccount(newAcc)
+      Js.log2("Accounts changed notification from line 91. New acc is: ", newAcc)
+    })
     resolve()
   })
   ->ignore
+
   let handlers = {
     connectToMetamaskWallet: _ => {
-      // let _ =
-      //   window.ethereum
-      //   ->sendRequest({method: "eth_requestAccounts"})
-      //   ->then(acc => {
-      //     Js.log2("Acc value fetched after promise: ", acc)
-      //     SetAccountAddress(Some(acc[0]))->dispatch
-      //     let _ =
-      //       window.ethereum
-      //       ->sendBalanceRequest({
-      //         method: "eth_getBalance",
-      //         params: [acc[0], "latest"],
-      //       })
-      //       ->then(someBal => {
-      //         Js.log2("Somebalance fetched is: ", someBal)
-      //         let bal = ethers.utils->formatEther(someBal)
-      //         // setAccountBalance(_ => Some(someBal))
-      //         SetAccountBalance(Some(bal))->dispatch
-      //         Js.log2("Ultimate value of bal fetched is: ", bal)
-      //         resolve()
-      //       })
-      //       ->ignore
-      //     resolve()
-      //   })
-      //   ->ignore
-      Js.log("Empty function")
-    },
-    onListener: _ => {
-      // window.ethereum->onAccountChangeListener("accountsChanged", newAccount => {
-      //   Js.log2("Account were changed in metamask--->", newAccount)
-      // })
-      Js.log("Empty onlistener")
+      let _ =
+        windowEthereumObject
+        ->sendRequest({method: "eth_requestAccounts"})
+        ->then(fetchedAccount => {
+          setAccount(fetchedAccount)
+          resolve()
+        })
     },
   }
 

@@ -2,7 +2,11 @@
 
 import * as Curry from "../node_modules/rescript/lib/es6/curry.js";
 import * as React from "react";
+import * as Caml_array from "../node_modules/rescript/lib/es6/caml_array.js";
 import * as Belt_Option from "../node_modules/rescript/lib/es6/belt_Option.js";
+
+import {ethers} from 'ethers'
+;
 
 function reducer(state, action) {
   if (action.TAG === /* SetAccountAddress */0) {
@@ -22,36 +26,64 @@ function MetamaskTest(Props) {
   var match = React.useState(function () {
         return window.ethereum;
       });
-  var setWindowObj = match[1];
-  var windowObj = match[0];
-  var match$1 = React.useReducer(reducer, {
+  var windowEthereumObject = match[0];
+  var match$1 = React.useState(function () {
+        return ethers.utils;
+      });
+  var ethersUtilObject = match$1[0];
+  var match$2 = React.useReducer(reducer, {
         accountAddress: undefined,
         accountBalance: undefined
       });
-  var state = match$1[0];
-  React.useEffect((function () {
-          var getEthereumObject = function (param) {
-            return Curry._1(setWindowObj, (function (param) {
-                          return window.ethereum;
-                        }));
-          };
-          window.ethereum.on("accountsChanged", getEthereumObject);
-          
-        }), [windowObj]);
-  console.log("windowObj use state value: ", windowObj);
-  windowObj.request({
+  var dispatch = match$2[1];
+  var state = match$2[0];
+  React.useEffect(function () {
+        console.log("From inside useEffect code block, line 66: ");
+        
+      });
+  var setAccount = function (account) {
+    Curry._1(dispatch, {
+          TAG: /* SetAccountAddress */0,
+          _0: Caml_array.get(account, 0)
+        });
+    windowEthereumObject.request({
+            method: "eth_getBalance",
+            params: [
+              Caml_array.get(account, 0),
+              "latest"
+            ]
+          }).then(function (fetchedBalanceHex) {
+          var readableBalance = ethersUtilObject.formatEther(fetchedBalanceHex);
+          Curry._1(dispatch, {
+                TAG: /* SetAccountBalance */1,
+                _0: readableBalance
+              });
+          return Promise.resolve(undefined);
+        });
+    
+  };
+  console.log("windowObj use state value: ", windowEthereumObject);
+  windowEthereumObject.request({
           method: "eth_requestAccounts"
         }).then(function (acc) {
         console.log("Acc value fetched is: ", acc);
+        window.ethereum.on("accountsChanged", (function (newAcc) {
+                setAccount(newAcc);
+                console.log("Accounts changed notification from line 91. New acc is: ", newAcc);
+                
+              }));
         return Promise.resolve(undefined);
       });
-  var handlers_connectToMetamaskWallet = function (param) {
-    console.log("Empty function");
-    
-  };
-  var handlers_onListener = function (param) {
-    console.log("Empty onlistener");
-    
+  var handlers = {
+    connectToMetamaskWallet: (function (param) {
+        windowEthereumObject.request({
+                method: "eth_requestAccounts"
+              }).then(function (fetchedAccount) {
+              setAccount(fetchedAccount);
+              return Promise.resolve(undefined);
+            });
+        
+      })
   };
   return React.createElement("div", undefined, React.createElement("p", {
                   className: "p-5 text-3xl"
@@ -59,7 +91,7 @@ function MetamaskTest(Props) {
                   className: "p-5"
                 }, React.createElement("button", {
                       className: "p-5 bg-blue-400 rounded-lg text-white",
-                      onClick: handlers_connectToMetamaskWallet
+                      onClick: handlers.connectToMetamaskWallet
                     }, "Connect to Metamask")), React.createElement("div", {
                   className: "p-5 text-3xl "
                 }, React.createElement("p", undefined, "Account address: ", Belt_Option.getWithDefault(state.accountAddress, "value unavailable(Metamask not connected)")), React.createElement("p", undefined, "Account balance: ", Belt_Option.getWithDefault(state.accountBalance, "value unavailable(Metamask not connected)"))));
@@ -72,4 +104,4 @@ export {
   make ,
   
 }
-/* react Not a pure module */
+/*  Not a pure module */
