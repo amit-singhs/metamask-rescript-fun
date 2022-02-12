@@ -41,6 +41,10 @@ function MetamaskTest(Props) {
         console.log("From inside useEffect code block, line 66: ");
         
       });
+  window.ethereum.on("chainChanged", (function (param) {
+          window.location.reload();
+          
+        }));
   var setAccount = function (account) {
     Curry._1(dispatch, {
           TAG: /* SetAccountAddress */0,

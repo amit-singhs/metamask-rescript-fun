@@ -3,6 +3,7 @@ type ethersModule
 type utils
 type utilsModule
 type address
+type location
 type addParams = {method: string, params: array<string>}
 type ethers = {utils: utilsModule}
 type requestParams = {method: string}
@@ -23,9 +24,13 @@ type window = {ethereum: ethereum}
 %%raw("import {ethers} from 'ethers'")
 
 @scope("window") @val external ethereumConstructor: ethereum = "ethereum"
+@scope("window") @val external locationConstructor: location = "location"
+@send external reload: location => unit = "reload"
 @scope("ethers") @val external ethersConstructor: ethers = "utils"
 @scope("window.ethereum") @val
 external addOnEventListener: (string, array<string> => unit) => unit = "on"
+@scope("window.ethereum") @val
+external addChainChangeListener: (string, unit => unit) => unit = "on"
 @send external sendRequest: (ethereum, requestParams) => Promise.t<array<string>> = "request"
 @send external sendBalanceRequest: (ethereum, addParams) => Promise.t<string> = "request"
 @send external formatEther: (ethers, string) => string = "formatEther"
@@ -49,6 +54,11 @@ let make = () => {
 
     None
   })
+
+  addChainChangeListener("chainChanged", _ => {
+    locationConstructor->reload
+  })
+
   let setAccount = account => {
     SetAccountAddress(Some(account[0]))->dispatch
     let _ =
