@@ -1,5 +1,23 @@
+type action =
+  | SetToAddress(option<string>)
+  | SetAmount(option<float>)
+
+type state = {
+  toAddress: option<string>,
+  amount: option<float>,
+}
+
+let reducer = (state, action) => {
+  switch action {
+  | SetToAddress(_someToAddress) => state
+  | SetAmount(_someAmount) => state
+  }
+}
+
 @react.component
 let make = () => {
+  let (state, dispatch) = React.useReducer(reducer, {toAddress: None, amount: None})
+
   <div>
     <div className="p-4">
       <p className="mb-7"> {"Send ethereum:"->React.string} </p>

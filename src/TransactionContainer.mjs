@@ -2,7 +2,15 @@
 
 import * as React from "react";
 
+function reducer(state, action) {
+  return state;
+}
+
 function TransactionContainer(Props) {
+  React.useReducer(reducer, {
+        toAddress: undefined,
+        amount: undefined
+      });
   return React.createElement("div", undefined, React.createElement("div", {
                   className: "p-4"
                 }, React.createElement("p", {
@@ -25,6 +33,7 @@ function TransactionContainer(Props) {
 var make = TransactionContainer;
 
 export {
+  reducer ,
   make ,
   
 }
