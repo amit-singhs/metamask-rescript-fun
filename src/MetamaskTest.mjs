@@ -40,6 +40,9 @@ function MetamaskTest(Props) {
         return ethers.utils;
       });
   var ethersUtilObject = match$1[0];
+  React.useState(function () {
+        return ethers.providers;
+      });
   var match$2 = React.useReducer(reducer, {
         accountAddress: undefined,
         accountBalance: undefined,
@@ -105,6 +108,18 @@ function MetamaskTest(Props) {
       return React.createElement("div", undefined);
     }
   };
+  var handlers_submitTransaction = function (param) {
+    var provider = new ethers.providers.Web3Provider(windowEthereumObject);
+    var signer = provider.getSigner();
+    signer.sendTransaction({
+            to: "0x9c7e55be1134774ac344481Ee2B8Ea4b7bd2ccfb",
+            value: "0x7A120"
+          }).then(function (txId) {
+          console.log("The transaction id received is: ", txId);
+          return Promise.resolve(undefined);
+        });
+    
+  };
   return React.createElement("div", undefined, React.createElement("p", {
                   className: "p-5 text-3xl"
                 }, "Welcome to Metamask test"), React.createElement("div", {
@@ -114,7 +129,10 @@ function MetamaskTest(Props) {
                       onClick: handlers_connectToMetamaskWallet
                     }, "Connect to Metamask")), React.createElement("div", {
                   className: "p-5 text-3xl "
-                }, React.createElement("p", undefined, "Account address: ", Belt_Option.getWithDefault(state.accountAddress, "value unavailable(Metamask not connected)")), React.createElement("p", undefined, "Account balance: ", Belt_Option.getWithDefault(state.accountBalance, "value unavailable(Metamask not connected)")), Curry._1(handlers_renderTransactionComponent, state.enableTransaction)));
+                }, React.createElement("p", undefined, "Account address: ", Belt_Option.getWithDefault(state.accountAddress, "value unavailable(Metamask not connected)")), React.createElement("p", undefined, "Account balance: ", Belt_Option.getWithDefault(state.accountBalance, "value unavailable(Metamask not connected)")), React.createElement("button", {
+                      className: "p-3 bg-blue-400  text-xl rounded-lg text-white",
+                      onClick: handlers_submitTransaction
+                    }, "Submit")));
 }
 
 var make = MetamaskTest;
