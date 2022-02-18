@@ -111,9 +111,10 @@ function MetamaskTest(Props) {
   var handlers_submitTransaction = function (param) {
     var provider = new ethers.providers.Web3Provider(windowEthereumObject);
     var signer = provider.getSigner();
+    var ethValue = ethersUtilObject.parseEther("0.004");
     signer.sendTransaction({
             to: "0x9c7e55be1134774ac344481Ee2B8Ea4b7bd2ccfb",
-            value: "0x7A120"
+            value: ethValue
           }).then(function (txId) {
           console.log("The transaction id received is: ", txId);
           return Promise.resolve(undefined);

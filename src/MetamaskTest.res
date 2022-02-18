@@ -55,6 +55,7 @@ external addChainChangeListener: (string, unit => unit) => unit = "on"
 @send external getSigner: provider => signer = "getSigner"
 @send external sendTransaction: (signer, transaction) => Promise.t<string> = "sendTransaction"
 @new external getWeb3Provider: ethereum => provider = "ethers.providers.Web3Provider"
+@send external parseEther: (ethers, string) => string = "parseEther"
 
 let reducer = (state, action) => {
   switch action {
@@ -134,11 +135,12 @@ let make = () => {
     submitTransaction: _ => {
       let provider = windowEthereumObject->getWeb3Provider
       let signer = provider->getSigner
+      let ethValue = ethersUtilObject->parseEther("0.004")
       let _ =
         signer
         ->sendTransaction({
           to: "0x9c7e55be1134774ac344481Ee2B8Ea4b7bd2ccfb",
-          value: "0x7A120",
+          value: ethValue,
         })
         ->then(txId => {
           Js.log2("The transaction id received is: ", txId)
