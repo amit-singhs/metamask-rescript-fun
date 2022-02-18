@@ -52,10 +52,9 @@ external addChainChangeListener: (string, unit => unit) => unit = "on"
 @send external sendBalanceRequest: (ethereum, addParams) => Promise.t<string> = "request"
 @send external formatEther: (ethers, string) => string = "formatEther"
 @send external onAccountChangeListener: (ethereum, string, unit => unit) => unit = "on"
-@new external getWeb3Provider: providersModule => provider = "Web3Provider"
 @send external getSigner: provider => signer = "getSigner"
 @send external sendTransaction: (signer, transaction) => Promise.t<string> = "sendTransaction"
-@new external getWeb3: ethereum => provider = "ethers.providers.Web3Provider"
+@new external getWeb3Provider: ethereum => provider = "ethers.providers.Web3Provider"
 
 let reducer = (state, action) => {
   switch action {
@@ -133,7 +132,7 @@ let make = () => {
       }
     },
     submitTransaction: _ => {
-      let provider = windowEthereumObject->getWeb3
+      let provider = windowEthereumObject->getWeb3Provider
       let signer = provider->getSigner
       let _ =
         signer
