@@ -51,6 +51,9 @@ let make = () => {
   Metamask.addOnEventListener("accountsChanged", newAcc => {
     setAccount(newAcc)
   })
+  Metamask.addChainChangeListener("chainChanged", _ => {
+    Metamask.locationConstructor->Metamask.reload
+  })
   let handlers = {
     connectToMetamaskWallet: _ => {
       let _ = Metamask.connectToMetamaskWalletP()->then(fetchedAccount => {

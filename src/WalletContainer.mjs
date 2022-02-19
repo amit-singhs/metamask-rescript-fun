@@ -61,6 +61,10 @@ function WalletContainer(Props) {
     
   };
   window.ethereum.on("accountsChanged", setAccount);
+  window.ethereum.on("chainChanged", (function (param) {
+          window.location.reload();
+          
+        }));
   var handlers_connectToMetamaskWallet = function (param) {
     Metamask.connectToMetamaskWalletP(undefined).then(function (fetchedAccount) {
           setAccount(fetchedAccount);
