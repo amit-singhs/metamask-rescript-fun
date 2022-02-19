@@ -41,6 +41,10 @@ function TransactionContainer(Props) {
                 _0: value
               });
   };
+  var handlers_handleSubmit = function (param) {
+    console.log("from inside handle submit, amount is: ", state.amount);
+    
+  };
   return React.createElement("div", undefined, React.createElement("div", {
                   className: "p-4"
                 }, React.createElement("p", {
@@ -60,7 +64,8 @@ function TransactionContainer(Props) {
                     }), React.createElement("div", {
                       className: "mt-5"
                     }, React.createElement("button", {
-                          className: "p-3 bg-blue-400  text-xl rounded-lg text-white"
+                          className: "p-3 bg-blue-400  text-xl rounded-lg text-white",
+                          onClick: handlers_handleSubmit
                         }, "Submit"))));
 }
 

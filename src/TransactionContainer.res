@@ -10,6 +10,7 @@ type state = {
 type handlers = {
   updateToAddress: ReactEvent.Form.t => unit,
   updateAmount: ReactEvent.Form.t => unit,
+  handleSubmit: ReactEvent.Mouse.t => unit,
 }
 
 let reducer = (state, action) => {
@@ -34,6 +35,13 @@ let make = () => {
       let value = ReactEvent.Form.target(evt)["value"]
       SetAmount(Some(value))->dispatch
     },
+    handleSubmit: _ => {
+      let _ = Js.log2("from inside handle submit, amount is: ", state.amount)
+      // MetamaskTest.submitTransP(state.amount. state.toAddress)
+      // ->then(txId=>{
+      //   Js.log2("From inside Transaction Container: ", txId)
+      // })
+    },
   }
 
   <div>
@@ -54,7 +62,9 @@ let make = () => {
         className="mt-7 p-5 w-7/12 ring-2 ring-blue-400"
       />
       <div className="mt-5">
-        <button className="p-3 bg-blue-400  text-xl rounded-lg text-white">
+        <button
+          className="p-3 bg-blue-400  text-xl rounded-lg text-white"
+          onClick={handlers.handleSubmit}>
           {"Submit"->React.string}
         </button>
       </div>

@@ -2,6 +2,7 @@
 
 import * as Curry from "../node_modules/rescript/lib/es6/curry.js";
 import * as React from "react";
+import * as Metamask from "./Metamask.mjs";
 import * as Caml_array from "../node_modules/rescript/lib/es6/caml_array.js";
 import * as Belt_Option from "../node_modules/rescript/lib/es6/belt_Option.js";
 import * as TransactionContainer from "./TransactionContainer.mjs";
@@ -31,46 +32,25 @@ function reducer(state, action) {
   }
 }
 
-function MetamaskTest(Props) {
-  var match = React.useState(function () {
-        return window.ethereum;
-      });
-  var windowEthereumObject = match[0];
-  var match$1 = React.useState(function () {
-        return ethers.utils;
-      });
-  var ethersUtilObject = match$1[0];
-  React.useState(function () {
-        return ethers.providers;
-      });
-  var match$2 = React.useReducer(reducer, {
+function WalletContainer(Props) {
+  var match = React.useReducer(reducer, {
         accountAddress: undefined,
         accountBalance: undefined,
         enableTransaction: false
       });
-  var dispatch = match$2[1];
-  var state = match$2[0];
+  var dispatch = match[1];
+  var state = match[0];
   React.useEffect(function () {
         console.log("From inside useEffect code block, line 66: ");
         
       });
-  window.ethereum.on("chainChanged", (function (param) {
-          window.location.reload();
-          
-        }));
   var setAccount = function (account) {
     Curry._1(dispatch, {
           TAG: /* SetAccountAddress */0,
           _0: Caml_array.get(account, 0)
         });
-    windowEthereumObject.request({
-            method: "eth_getBalance",
-            params: [
-              Caml_array.get(account, 0),
-              "latest"
-            ]
-          }).then(function (fetchedBalanceHex) {
-          var readableBalance = ethersUtilObject.formatEther(fetchedBalanceHex);
+    Metamask.getAccountBalanceP(account).then(function (fetchedBalanceHex) {
+          var readableBalance = ethers.utils.formatEther(fetchedBalanceHex);
           Curry._1(dispatch, {
                 TAG: /* SetAccountBalance */1,
                 _0: readableBalance
@@ -80,22 +60,9 @@ function MetamaskTest(Props) {
         });
     
   };
-  console.log("windowObj use state value: ", windowEthereumObject);
-  windowEthereumObject.request({
-          method: "eth_requestAccounts"
-        }).then(function (acc) {
-        console.log("Acc value fetched is: ", acc);
-        window.ethereum.on("accountsChanged", (function (newAcc) {
-                setAccount(newAcc);
-                console.log("Accounts changed notification from line 91. New acc is: ", newAcc);
-                
-              }));
-        return Promise.resolve(undefined);
-      });
+  window.ethereum.on("accountsChanged", setAccount);
   var handlers_connectToMetamaskWallet = function (param) {
-    windowEthereumObject.request({
-            method: "eth_requestAccounts"
-          }).then(function (fetchedAccount) {
+    Metamask.connectToMetamaskWalletP(undefined).then(function (fetchedAccount) {
           setAccount(fetchedAccount);
           return Promise.resolve(undefined);
         });
@@ -108,19 +75,6 @@ function MetamaskTest(Props) {
       return React.createElement("div", undefined);
     }
   };
-  var handlers_submitTransaction = function (param) {
-    var provider = new ethers.providers.Web3Provider(windowEthereumObject);
-    var signer = provider.getSigner();
-    var ethValue = ethersUtilObject.parseEther("0.004");
-    signer.sendTransaction({
-            to: "0x9c7e55be1134774ac344481Ee2B8Ea4b7bd2ccfb",
-            value: ethValue
-          }).then(function (txId) {
-          console.log("The transaction id received is: ", txId);
-          return Promise.resolve(undefined);
-        });
-    
-  };
   return React.createElement("div", undefined, React.createElement("p", {
                   className: "p-5 text-3xl"
                 }, "Welcome to Metamask test"), React.createElement("div", {
@@ -130,13 +84,10 @@ function MetamaskTest(Props) {
                       onClick: handlers_connectToMetamaskWallet
                     }, "Connect to Metamask")), React.createElement("div", {
                   className: "p-5 text-3xl "
-                }, React.createElement("p", undefined, "Account address: ", Belt_Option.getWithDefault(state.accountAddress, "value unavailable(Metamask not connected)")), React.createElement("p", undefined, "Account balance: ", Belt_Option.getWithDefault(state.accountBalance, "value unavailable(Metamask not connected)")), React.createElement("button", {
-                      className: "p-3 bg-blue-400  text-xl rounded-lg text-white",
-                      onClick: handlers_submitTransaction
-                    }, "Submit")));
+                }, React.createElement("p", undefined, "Account address: ", Belt_Option.getWithDefault(state.accountAddress, "value unavailable(Metamask not connected)")), React.createElement("p", undefined, "Account balance: ", Belt_Option.getWithDefault(state.accountBalance, "value unavailable(Metamask not connected)")), React.createElement("p", undefined, "Hello"), Curry._1(handlers_renderTransactionComponent, state.enableTransaction)));
 }
 
-var make = MetamaskTest;
+var make = WalletContainer;
 
 export {
   reducer ,

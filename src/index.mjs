@@ -2,12 +2,12 @@
 
 import * as React from "react";
 import * as ReactDom from "react-dom";
-import * as MetamaskTest from "./MetamaskTest.mjs";
+import * as WalletContainer from "./WalletContainer.mjs";
 
 var root = document.querySelector("#root");
 
 if (!(root == null)) {
-  ReactDom.render(React.createElement("div", undefined, React.createElement(MetamaskTest.make, {})), root);
+  ReactDom.render(React.createElement("div", undefined, React.createElement(WalletContainer.make, {})), root);
 }
 
 export {
