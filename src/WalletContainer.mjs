@@ -88,7 +88,7 @@ function WalletContainer(Props) {
                       onClick: handlers_connectToMetamaskWallet
                     }, "Connect to Metamask")), React.createElement("div", {
                   className: "p-5 text-3xl "
-                }, React.createElement("p", undefined, "Account address: ", Belt_Option.getWithDefault(state.accountAddress, "value unavailable(Metamask not connected)")), React.createElement("p", undefined, "Account balance: ", Belt_Option.getWithDefault(state.accountBalance, "value unavailable(Metamask not connected)")), React.createElement("p", undefined, "Hello"), Curry._1(handlers_renderTransactionComponent, state.enableTransaction)));
+                }, React.createElement("p", undefined, "Account address: ", Belt_Option.getWithDefault(state.accountAddress, "value unavailable(Metamask not connected)")), React.createElement("p", undefined, "Account balance: ", Belt_Option.getWithDefault(state.accountBalance, "value unavailable(Metamask not connected)")), Curry._1(handlers_renderTransactionComponent, state.enableTransaction)));
 }
 
 var make = WalletContainer;

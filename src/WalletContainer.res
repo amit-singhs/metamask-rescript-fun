@@ -92,7 +92,6 @@ let make = () => {
         ->Belt.Option.getWithDefault("value unavailable(Metamask not connected)")
         ->React.string}
       </p>
-      <p> {"Hello"->React.string} </p>
       {handlers.renderTransactionComponent(state.enableTransaction)}
     </div>
   </div>
