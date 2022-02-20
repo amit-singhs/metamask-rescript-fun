@@ -24,11 +24,10 @@ function connectToMetamaskWalletP(param) {
 function submitTransactionP(amountInEth, toAddress) {
   var provider = new ethers.providers.Web3Provider(window.ethereum);
   var signer = provider.getSigner();
-  signer.sendTransaction({
-        to: toAddress,
-        value: ethers.utils.parseEther(amountInEth)
-      });
-  
+  return signer.sendTransaction({
+              to: toAddress,
+              value: ethers.utils.parseEther(amountInEth)
+            });
 }
 
 export {

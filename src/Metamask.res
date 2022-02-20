@@ -59,11 +59,12 @@ let connectToMetamaskWalletP = _ => {
 
 /* submitTransaction takes an amount in ethereum and address to which you want to send
 that ethereum, and it will submit that transaction to metamask wallet, further on you
-would need to confirm this transaction from your metamask wallet */
+would need to confirm this transaction from your metamask wallet, successful transaction
+will return a Promise with transaction details */
 let submitTransactionP = (amountInEth, toAddress) => {
   let provider = ethereumConstructor->getWeb3Provider
   let signer = provider->getSigner
-  let _ = signer->sendTransaction({
+  signer->sendTransaction({
     to: toAddress,
     value: ethersUtilsConstructor->parseEther(amountInEth),
   })

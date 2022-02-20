@@ -1,10 +1,15 @@
+open Promise
 type action =
   | SetToAddress(option<string>)
-  | SetAmount(option<float>)
+  | SetAmount(option<string>)
+  | SetAmountFlag(bool)
+  | SetToAddressFlag(bool)
 
 type state = {
   toAddress: option<string>,
-  amount: option<float>,
+  amount: option<string>,
+  toAddressFlag: bool,
+  amountFlag: bool,
 }
 
 type handlers = {
@@ -17,30 +22,46 @@ let reducer = (state, action) => {
   switch action {
   | SetToAddress(someToAddress) => {...state, toAddress: someToAddress}
   | SetAmount(someAmount) => {...state, amount: someAmount}
+  | SetAmountFlag(flag) => {...state, amountFlag: flag}
+  | SetToAddressFlag(flag) => {...state, toAddressFlag: flag}
   }
 }
 
 @react.component
 let make = () => {
-  let (state, dispatch) = React.useReducer(reducer, {toAddress: None, amount: None})
+  let (state, dispatch) = React.useReducer(
+    reducer,
+    {toAddress: None, amount: None, toAddressFlag: false, amountFlag: false},
+  )
 
   let handlers = {
     updateToAddress: evt => {
       ReactEvent.Form.preventDefault(evt)
       let value = ReactEvent.Form.target(evt)["value"]
+      SetToAddressFlag(true)->dispatch
       SetToAddress(Some(value))->dispatch
     },
     updateAmount: evt => {
       ReactEvent.Form.preventDefault(evt)
       let value = ReactEvent.Form.target(evt)["value"]
+      SetAmountFlag(true)->dispatch
       SetAmount(Some(value))->dispatch
     },
     handleSubmit: _ => {
       let _ = Js.log2("from inside handle submit, amount is: ", state.amount)
-      // MetamaskTest.submitTransP(state.amount. state.toAddress)
-      // ->then(txId=>{
-      //   Js.log2("From inside Transaction Container: ", txId)
-      // })
+      let _ = Js.log2("from inside handle submit, address is: ", state.toAddress)
+      let _ = Js.log2("from inside handle submit, toAddress flag is: ", state.toAddressFlag)
+      let _ = Js.log2("from inside handle submit, amount flag is: ", state.amountFlag)
+      Metamask.submitTransactionP(
+        state.amount->Belt.Option.getWithDefault(""),
+        state.toAddress->Belt.Option.getWithDefault(""),
+      )
+      ->then(txId =>
+        {
+          Js.log2("From handle submit, txid received is: ", txId)
+        }->resolve
+      )
+      ->ignore
     },
   }
 
@@ -57,7 +78,7 @@ let make = () => {
       <input
         type_="text"
         onChange={handlers.updateAmount}
-        value={state.amount->Belt.Option.getWithDefault(0.0)->Belt.Float.toString}
+        value={state.amount->Belt.Option.getWithDefault("")}
         placeholder="Amount.."
         className="mt-7 p-5 w-7/12 ring-2 ring-blue-400"
       />

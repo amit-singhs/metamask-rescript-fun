@@ -1,4 +1,5 @@
 open Promise
+open Metamask
 %%raw("import {ethers} from 'ethers'")
 
 type handlers = {
@@ -38,25 +39,24 @@ let make = () => {
   let setAccount = account => {
     SetAccountAddress(Some(account[0]))->dispatch
     let _ =
-      Metamask.getAccountBalanceP(account)
+      getAccountBalanceP(account)
       ->then(fetchedBalanceHex => {
-        let readableBalance =
-          Metamask.ethersUtilsConstructor->Metamask.formatEther(fetchedBalanceHex)
+        let readableBalance = ethersUtilsConstructor->formatEther(fetchedBalanceHex)
         SetAccountBalance(Some(readableBalance))->dispatch
         SetTransactionFlag->dispatch
         resolve()
       })
       ->ignore
   }
-  Metamask.addOnEventListener("accountsChanged", newAcc => {
+  addOnEventListener("accountsChanged", newAcc => {
     setAccount(newAcc)
   })
-  Metamask.addChainChangeListener("chainChanged", _ => {
-    Metamask.locationConstructor->Metamask.reload
+  addChainChangeListener("chainChanged", _ => {
+    locationConstructor->reload
   })
   let handlers = {
     connectToMetamaskWallet: _ => {
-      let _ = Metamask.connectToMetamaskWalletP()->then(fetchedAccount => {
+      let _ = connectToMetamaskWalletP()->then(fetchedAccount => {
         setAccount(fetchedAccount)
         resolve()
       })

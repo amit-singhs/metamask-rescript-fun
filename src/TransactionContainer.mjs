@@ -2,32 +2,59 @@
 
 import * as Curry from "../node_modules/rescript/lib/es6/curry.js";
 import * as React from "react";
+import * as Metamask from "./Metamask.mjs";
 import * as Belt_Option from "../node_modules/rescript/lib/es6/belt_Option.js";
 
 function reducer(state, action) {
-  if (action.TAG === /* SetToAddress */0) {
-    return {
-            toAddress: action._0,
-            amount: state.amount
-          };
-  } else {
-    return {
-            toAddress: state.toAddress,
-            amount: action._0
-          };
+  switch (action.TAG | 0) {
+    case /* SetToAddress */0 :
+        return {
+                toAddress: action._0,
+                amount: state.amount,
+                toAddressFlag: state.toAddressFlag,
+                amountFlag: state.amountFlag
+              };
+    case /* SetAmount */1 :
+        return {
+                toAddress: state.toAddress,
+                amount: action._0,
+                toAddressFlag: state.toAddressFlag,
+                amountFlag: state.amountFlag
+              };
+    case /* SetAmountFlag */2 :
+        return {
+                toAddress: state.toAddress,
+                amount: state.amount,
+                toAddressFlag: state.toAddressFlag,
+                amountFlag: action._0
+              };
+    case /* SetToAddressFlag */3 :
+        return {
+                toAddress: state.toAddress,
+                amount: state.amount,
+                toAddressFlag: action._0,
+                amountFlag: state.amountFlag
+              };
+    
   }
 }
 
 function TransactionContainer(Props) {
   var match = React.useReducer(reducer, {
         toAddress: undefined,
-        amount: undefined
+        amount: undefined,
+        toAddressFlag: false,
+        amountFlag: false
       });
   var dispatch = match[1];
   var state = match[0];
   var handlers_updateToAddress = function (evt) {
     evt.preventDefault();
     var value = evt.target.value;
+    Curry._1(dispatch, {
+          TAG: /* SetToAddressFlag */3,
+          _0: true
+        });
     return Curry._1(dispatch, {
                 TAG: /* SetToAddress */0,
                 _0: value
@@ -36,6 +63,10 @@ function TransactionContainer(Props) {
   var handlers_updateAmount = function (evt) {
     evt.preventDefault();
     var value = evt.target.value;
+    Curry._1(dispatch, {
+          TAG: /* SetAmountFlag */2,
+          _0: true
+        });
     return Curry._1(dispatch, {
                 TAG: /* SetAmount */1,
                 _0: value
@@ -43,6 +74,12 @@ function TransactionContainer(Props) {
   };
   var handlers_handleSubmit = function (param) {
     console.log("from inside handle submit, amount is: ", state.amount);
+    console.log("from inside handle submit, address is: ", state.toAddress);
+    console.log("from inside handle submit, toAddress flag is: ", state.toAddressFlag);
+    console.log("from inside handle submit, amount flag is: ", state.amountFlag);
+    Metamask.submitTransactionP(Belt_Option.getWithDefault(state.amount, ""), Belt_Option.getWithDefault(state.toAddress, "")).then(function (txId) {
+          return Promise.resolve((console.log("From handle submit, txid received is: ", txId), undefined));
+        });
     
   };
   return React.createElement("div", undefined, React.createElement("div", {
@@ -59,7 +96,7 @@ function TransactionContainer(Props) {
                       className: "mt-7 p-5 w-7/12 ring-2 ring-blue-400",
                       placeholder: "Amount..",
                       type: "text",
-                      value: String(Belt_Option.getWithDefault(state.amount, 0.0)),
+                      value: Belt_Option.getWithDefault(state.amount, ""),
                       onChange: handlers_updateAmount
                     }), React.createElement("div", {
                       className: "mt-5"
