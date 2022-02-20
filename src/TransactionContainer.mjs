@@ -2,8 +2,10 @@
 
 import * as Curry from "../node_modules/rescript/lib/es6/curry.js";
 import * as React from "react";
+import * as $$Promise from "../node_modules/@ryyppy/rescript-promise/src/Promise.mjs";
 import * as Metamask from "./Metamask.mjs";
 import * as Belt_Option from "../node_modules/rescript/lib/es6/belt_Option.js";
+import * as TransactionSuccess from "./TransactionSuccess.mjs";
 
 function reducer(state, action) {
   switch (action.TAG | 0) {
@@ -12,28 +14,54 @@ function reducer(state, action) {
                 toAddress: action._0,
                 amount: state.amount,
                 toAddressFlag: state.toAddressFlag,
-                amountFlag: state.amountFlag
+                amountFlag: state.amountFlag,
+                transactionFlag: state.transactionFlag,
+                transactionResponseObject: state.transactionResponseObject
               };
     case /* SetAmount */1 :
         return {
                 toAddress: state.toAddress,
                 amount: action._0,
                 toAddressFlag: state.toAddressFlag,
-                amountFlag: state.amountFlag
+                amountFlag: state.amountFlag,
+                transactionFlag: state.transactionFlag,
+                transactionResponseObject: state.transactionResponseObject
               };
     case /* SetAmountFlag */2 :
         return {
                 toAddress: state.toAddress,
                 amount: state.amount,
                 toAddressFlag: state.toAddressFlag,
-                amountFlag: action._0
+                amountFlag: action._0,
+                transactionFlag: state.transactionFlag,
+                transactionResponseObject: state.transactionResponseObject
               };
     case /* SetToAddressFlag */3 :
         return {
                 toAddress: state.toAddress,
                 amount: state.amount,
                 toAddressFlag: action._0,
-                amountFlag: state.amountFlag
+                amountFlag: state.amountFlag,
+                transactionFlag: state.transactionFlag,
+                transactionResponseObject: state.transactionResponseObject
+              };
+    case /* SetTransactionFlag */4 :
+        return {
+                toAddress: state.toAddress,
+                amount: state.amount,
+                toAddressFlag: state.toAddressFlag,
+                amountFlag: state.amountFlag,
+                transactionFlag: action._0,
+                transactionResponseObject: state.transactionResponseObject
+              };
+    case /* SetTransactionResponse */5 :
+        return {
+                toAddress: state.toAddress,
+                amount: state.amount,
+                toAddressFlag: state.toAddressFlag,
+                amountFlag: state.amountFlag,
+                transactionFlag: state.transactionFlag,
+                transactionResponseObject: action._0
               };
     
   }
@@ -44,7 +72,9 @@ function TransactionContainer(Props) {
         toAddress: undefined,
         amount: undefined,
         toAddressFlag: false,
-        amountFlag: false
+        amountFlag: false,
+        transactionFlag: false,
+        transactionResponseObject: undefined
       });
   var dispatch = match[1];
   var state = match[0];
@@ -77,10 +107,28 @@ function TransactionContainer(Props) {
     console.log("from inside handle submit, address is: ", state.toAddress);
     console.log("from inside handle submit, toAddress flag is: ", state.toAddressFlag);
     console.log("from inside handle submit, amount flag is: ", state.amountFlag);
-    Metamask.submitTransactionP(Belt_Option.getWithDefault(state.amount, ""), Belt_Option.getWithDefault(state.toAddress, "")).then(function (txId) {
-          return Promise.resolve((console.log("From handle submit, txid received is: ", txId), undefined));
-        });
+    $$Promise.$$catch(Metamask.submitTransactionP(Belt_Option.getWithDefault(state.amount, ""), Belt_Option.getWithDefault(state.toAddress, "")).then(function (txId) {
+              return Promise.resolve((console.log("From handle submit, txid received is: ", txId), Curry._1(dispatch, {
+                                TAG: /* SetTransactionFlag */4,
+                                _0: true
+                              }), Curry._1(dispatch, {
+                                TAG: /* SetTransactionResponse */5,
+                                _0: txId
+                              })));
+            }), (function (err) {
+            console.log("Error is caught from promise catch block, error object is: ", err);
+            return Promise.resolve(undefined);
+          }));
     
+  };
+  var handlers_renderTransactionSuccessComponent = function (successFlag) {
+    if (successFlag) {
+      return React.createElement(TransactionSuccess.make, {
+                  txResponse: state.transactionResponseObject
+                });
+    } else {
+      return React.createElement("div", undefined);
+    }
   };
   return React.createElement("div", undefined, React.createElement("div", {
                   className: "p-4"
@@ -103,7 +151,7 @@ function TransactionContainer(Props) {
                     }, React.createElement("button", {
                           className: "p-3 bg-blue-400  text-xl rounded-lg text-white",
                           onClick: handlers_handleSubmit
-                        }, "Submit"))));
+                        }, "Submit")), Curry._1(handlers_renderTransactionSuccessComponent, state.transactionFlag)));
 }
 
 var make = TransactionContainer;

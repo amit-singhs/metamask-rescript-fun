@@ -21,6 +21,24 @@ type ethereum = {
   isMetaMask: bool,
   request: requestParams,
 }
+type transactionResponse = {
+  hash: string,
+  @as("type") _type: int,
+  chainId: int,
+  confirmations: int,
+  data: string,
+  from: string,
+  gasLimit: string,
+  gasPrice: string,
+  maxFeePerGas: string,
+  maxPriorityFeePerGas: string,
+  nonce: int,
+  r: string,
+  s: string,
+  to: string,
+  v: int,
+  value: string,
+}
 
 type window = {ethereum: ethereum}
 %%raw("import {ethers} from 'ethers'")
@@ -39,7 +57,9 @@ external addChainChangeListener: (string, unit => unit) => unit = "on"
 @send external formatEther: (ethers, string) => string = "formatEther"
 @send external onAccountChangeListener: (ethereum, string, unit => unit) => unit = "on"
 @send external getSigner: provider => signer = "getSigner"
-@send external sendTransaction: (signer, transaction) => Promise.t<string> = "sendTransaction"
+@send
+external sendTransaction: (signer, transaction) => Promise.t<transactionResponse> =
+  "sendTransaction"
 @new external getWeb3Provider: ethereum => provider = "ethers.providers.Web3Provider"
 @send external parseEther: (ethers, string) => string = "parseEther"
 
