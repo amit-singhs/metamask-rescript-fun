@@ -1,2 +1,2 @@
 # metamask-rescript-fun
-A project for playing around with metamask wallet using rescript.
+Rescript binding for doing a simple transaction using metamask from browser.
